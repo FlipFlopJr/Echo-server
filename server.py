@@ -1,19 +1,28 @@
 import socket
 
+
+def find_available_port(startPort, attempts = 100):
+    #Функция по поиску свободного порта
+    for port in range(startPort, startPort+attempts):
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind((socket.gethostname(), port))
+            return port
+        except:
+            continue
+
+
 server = socket.socket()            # создаем объект сокета сервера
 hostname = socket.gethostname()     # получаем имя хоста локальной машины
-port = 12345                        # устанавливаем порт сервера
+port = find_available_port(12345)   # устанавливаем порт сервера
+print(port)
+
 server.bind((hostname, port))       # привязываем сокет сервера к хосту и порту
 
 server.listen(5)
 
-
-
-
 while True:
     
-
-
     con, addr = server.accept()
     file = open(f"logfile_{addr}","w")
     file.write("Server starts\n")

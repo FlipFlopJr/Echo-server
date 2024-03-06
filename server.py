@@ -4,7 +4,6 @@ server = socket.socket()            # создаем объект сокета �
 hostname = socket.gethostname()     # получаем имя хоста локальной машины
 port = 12345                        # устанавливаем порт сервера
 server.bind((hostname, port))       # привязываем сокет сервера к хосту и порту
-print("Server starts")
 
 server.listen(5)
 
@@ -12,21 +11,31 @@ server.listen(5)
 
 
 while True:
-    print("Server started listening")
+    
+
 
     con, addr = server.accept()
-    print("Client connected")
+    file = open(f"logfile_{addr}","w")
+    file.write("Server starts\n")
+    file.write("Server started listening\n")
+
+    file.write("Client connected\n")
+
 
     try:
         while True:
             data = con.recv(1024).decode()
-            print('recieved data')
+
+            file.write(f"Recieved data: {data}\n")
 
             if data == 'exit':
                 con.close()
+                file.write(f"Connection with {addr} closed\n")
+                file.close()
                 break
             else:
-                print('Send data back')
+
+                file.write("Send data back\n")
                 con.send(data.encode())
     except:
         pass

@@ -1,11 +1,25 @@
 # Создать простой TCP-сервер, который принимает от клиента строку (порциями по 1 КБ) и возвращает ее. (Эхо-сервер).
 import socket
+import getpass
+import sys
 
 client = socket.socket()
-hostname = socket.gethostname()
-port = 12345
+f = True
+while f:
+    hostname = getpass.getpass(prompt="Input host name: ")
+    port = getpass.getpass(prompt="Input host port: ")
 
-client.connect((hostname, port))
+    if hostname == 'exit' or port == 'exit':
+        f = False
+    else:
+        try:
+            client.connect((hostname, int(port)))
+            break
+        except:
+            print("Wrong arguments")
+
+if not f:
+    sys.exit()
 
 print("Connected to server")
 
@@ -16,7 +30,7 @@ while command!='exit':
     client.send(command.encode())
 
     data = client.recv(1024)
-    print(f"You've recieved: {data.decode()}")
+    print(f"You've recieved: {data.decode()}\n")
 
     command = input("You send: ")
 

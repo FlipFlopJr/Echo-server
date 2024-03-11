@@ -21,6 +21,15 @@ while f:
 if not f:
     sys.exit()
 
+while True: #Ждем информацию от сервера, когда он нас идентифицирует в системе
+    data = client.recv(1024).decode()
+    if data == 'log': #Если сервер отправил нам информацию, что пользователя нет в бд, то просит ввести имя пользователя
+        username = input("Write your username: ")
+        client.send(f'{username}'.encode())
+    else:
+        print(data)
+        break
+
 print("Connected to server")
 
 command = input('You send: ')
@@ -30,6 +39,7 @@ while command!='exit':
     client.send(command.encode())
 
     data = client.recv(1024)
+
     print(f"You've recieved: {data.decode()}\n")
 
     command = input("You send: ")

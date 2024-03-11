@@ -1,4 +1,6 @@
 import socket
+import sqlite3
+from database_functions import *
 
 
 def find_available_port(startPort, attempts = 100):
@@ -17,6 +19,9 @@ hostname = socket.gethostname()     # получаем имя хоста лок�
 port = find_available_port(12345)   # устанавливаем порт сервера
 print(port)
 
+#Создаем базу данных пользователей
+create_database()
+
 server.bind((hostname, port))       # привязываем сокет сервера к хосту и порту
 
 server.listen(5)
@@ -24,7 +29,23 @@ server.listen(5)
 while True:
     
     con, addr = server.accept()
-    file = open(f"logfile_{addr}","w")
+    address = addr[0]
+
+    
+    while True: 
+        #Идентификация пользователя по ip: Если пользователь есть в бд, то приветствуем его, если нет - отправляем ему запрос на ввод имени пользователя
+        user = find_user(address) #Проверяем есть ли пользователь в бд
+        if not user: #Если его нет, отсылаем команду log с просьбой написать свое имя
+            con.send('log'.encode())
+
+            username = con.recv(1024).decode()
+            insert_database(address,username)
+        else:
+            con.send(f'Hello, {user[0][0]}'.encode()) #Если же пользователь все-таки есть в бд, то отправляем ему привет
+            break
+        
+
+    file = open(f"logfile_{address}","w")
     file.write("Server starts\n")
     file.write("Server started listening\n")
 
@@ -35,15 +56,15 @@ while True:
         while True:
             data = con.recv(1024).decode()
 
-            file.write(f"Recieved data: {data}\n")
-
             if data == 'exit':
                 con.close()
                 file.write(f"Connection with {addr} closed\n")
                 file.close()
                 break
+            if 'name_' in data:
+                insert_database(address,data.split('_')[1])
             else:
-
+                file.write(f"Recieved data: {data}\n")
                 file.write("Send data back\n")
                 con.send(data.encode())
     except:

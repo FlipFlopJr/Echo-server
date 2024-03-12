@@ -2,6 +2,9 @@
 import socket
 import getpass
 import sys
+from colorama import init, Fore, Back, Style
+
+init(autoreset=True)
 
 client = socket.socket()
 f = True
@@ -25,12 +28,18 @@ while True: #Ждем информацию от сервера, когда он 
     data = client.recv(1024).decode()
     if data == 'log': #Если сервер отправил нам информацию, что пользователя нет в бд, то просит ввести имя пользователя
         username = input("Write your username: ")
-        client.send(f'{username}'.encode())
+        password = getpass.getpass(prompt="Write your password: ")
+        client.send(f'{username+" "+password}'.encode())
+
+    elif data == 'check_passwd': #Сервер проверяет нас в системе по IP и просить войти по паролю
+        password = getpass.getpass(prompt="Input your password: ")
+        client.send(f'{password}'.encode())
+
     else:
-        print(data)
+        print(data,'\n')
         break
 
-print("Connected to server")
+print("Connected to server\n")
 
 command = input('You send: ')
 
@@ -40,10 +49,10 @@ while command!='exit':
 
     data = client.recv(1024)
 
-    print(f"You've recieved: {data.decode()}\n")
+    print(Fore.LIGHTGREEN_EX + f"You've recieved: {data.decode()}\n")
 
     command = input("You send: ")
 
 client.send(command.encode())
-print("Disconnecting from server")
+print("Disconnected from server")
 client.close()

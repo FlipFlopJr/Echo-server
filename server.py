@@ -38,10 +38,17 @@ while True:
         if not user: #Если его нет, отсылаем команду log с просьбой написать свое имя
             con.send('log'.encode())
 
-            username = con.recv(1024).decode()
-            insert_database(address,username)
+            username, password = con.recv(1024).decode().split()
+            insert_database(address,username,password)
         else:
-            con.send(f'Hello, {user[0][0]}'.encode()) #Если же пользователь все-таки есть в бд, то отправляем ему привет
+            while True:
+                con.send('check_passwd'.encode())
+                password = con.recv(1024).decode()
+                if check_passwd(address,password):
+                    con.send(f'Hello, {user[0][0]}'.encode()) #Если же пользователь все-таки есть в бд, то отправляем ему привет
+                    break
+                else:
+                    pass
             break
         
 
@@ -58,7 +65,7 @@ while True:
 
             if data == 'exit':
                 con.close()
-                file.write(f"Connection with {addr} closed\n")
+                file.write(f"Connection with {address} closed\n")
                 file.close()
                 break
             if 'name_' in data:
